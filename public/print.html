@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navbat Cheki</title>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        width: 58mm;
+        font-family: 'Golos Text', sans-serif;
+        text-align: center;
+        transform: translateX(2mm);
+      }
+
+      .check {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 8px 0;
+      }
+
+      .title { font-size: 24px; font-weight: bolder; margin-bottom: 6px; }
+      .divider { border-top: 1px dashed black; width: 90%; margin: 8px auto; }
+      .small { font-size: 26px; margin-top: 5px; }
+      .number { font-size: 105px; font-weight: bold; margin: 20px 0 15px; letter-spacing: 2px; }
+      .footer { font-size: 21px; margin-top: 10px; }
+      .check::after { content: ""; display: block; height: 2cm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="check">
+    <div class="title">SAMPI MEDLINE</div>
+    <div class="divider"></div>
+
+    <div class="small">Navbat raqami:</div>
+    <div class="number" id="queueNumber">00</div>
+
+    <div class="divider"></div>
+    <div class="footer">Tashrifingiz uchun rahmat!</div>
+    <div class="divider"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const num = params.get('num') || '00';
+    document.getElementById('queueNumber').textContent = String(num).padStart(2, '0');
+
+    localStorage.setItem("printStatus", "pending");
+
+    const mediaQueryList = window.matchMedia('print');
+    mediaQueryList.addEventListener('change', (mql) => {
+      if (!mql.matches) {
+        localStorage.setItem("printStatus", "success");
+        window.close();
+      }
+    });
+
+    window.onload = () => { window.print(); };
+  </script>
+</body>
+</html>

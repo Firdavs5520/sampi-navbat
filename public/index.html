@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sampi Medline Navbat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Golos Text', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f5f6fa;
+      text-align: center;
+      margin: 0;
+    }
+
+    h1 {
+      color: #2f3640;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .number {
+      font-size: 160px;
+      font-weight: bold;
+      color: #273c75;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .hint {
+      color: #718093;
+      font-size: 20px;
+      margin-top: 25px;
+    }
+
+    .enter-key {
+      margin-top: 10px;
+      width: 180px;
+      height: auto;
+      opacity: 0.9;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      border-radius: 10px;
+    }
+
+    .enter-key:hover {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+
+    .admin-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .admin-panel input {
+      width: 70px;
+      padding: 5px;
+      font-size: 16px;
+      text-align: center;
+      margin-right: 5px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+    }
+
+    .admin-panel button {
+      padding: 6px 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      background: #273c75;
+      color: white;
+      cursor: pointer;
+    }
+
+    .admin-panel button:hover {
+      background: #40739e;
+    }
+  </style>
+</head>
+<body>
+  <h1>SAMPI MEDLINE</h1>
+  <p>Navbat raqami:</p>
+  <div class="number" id="currentNumber">1</div>
+
+  <img
+    src="https://static.vecteezy.com/system/resources/thumbnails/009/326/542/small_2x/enter-computer-key-button-on-white-background-flat-style-enter-button-symbol-enter-key-sign-vector.jpg"
+    alt="Enter tugmasi" class="enter-key" id="enterBtn">
+
+  <p class="hint">Tugmani bosib chekni oling</p>
+
+  <div class="admin-panel">
+    <input type="number" id="adminInput" min="1" max="70" placeholder="1–70">
+    <button id="setBtn">Boshlash</button>
+    <button id="reprintBtn">Qayta chop etish</button>
+  </div>
+
+  <script>
+    // --- Boshlang'ich sozlamalar ---
+    let currentNumber = parseInt(localStorage.getItem('queueNumber')) || 1;
+    let printingInProgress = false; // enter 2 marta bosilmasin
+
+    const numberEl = document.getElementById("currentNumber");
+    numberEl.textContent = currentNumber;
+
+    function openPrint(num, mode = "new") {
+      if (printingInProgress) return; // oldingi print tugamasincha yangi bosilmasin
+      printingInProgress = true;
+
+      localStorage.setItem("printStatus", "pending");
+      const printWindow = window.open(`print.html?num=${num}`, "_blank");
+
+      const checkInterval = setInterval(() => {
+        if (printWindow.closed) {
+          clearInterval(checkInterval);
+          const status = localStorage.getItem("printStatus");
+
+          if (mode === "new" && status === "success") {
+            currentNumber++;
+            if (currentNumber > 70) currentNumber = 1;
+            localStorage.setItem("queueNumber", currentNumber);
+          }
+
+          numberEl.textContent = currentNumber;
+          printingInProgress = false;
+        }
+      }, 500);
+    }
+
+    // --- Tugma bosilganda ---
+    document.getElementById("enterBtn").addEventListener("click", () => openPrint(currentNumber));
+
+    // --- Klaviatura Enter bosilganda ---
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !printingInProgress) openPrint(currentNumber);
+    });
+
+    // --- Admin panel: raqam o‘rnatish ---
+    document.getElementById("setBtn").addEventListener("click", () => {
+      const val = Number(document.getElementById("adminInput").value);
+      if (val >= 1 && val <= 70) {
+        currentNumber = val;
+        localStorage.setItem("queueNumber", currentNumber);
+        numberEl.textContent = currentNumber;
+        alert(`Boshlanish raqami ${val} qilib o‘rnatildi.`);
+      } else {
+        alert("Raqam 1 dan 70 gacha bo‘lishi kerak!");
+      }
+    });
+
+    // --- Qayta chop etish ---
+    document.getElementById("reprintBtn").addEventListener("click", () => {
+      const last = Number(localStorage.getItem("queueNumber")) || currentNumber;
+      const prev = last - 1 > 0 ? last - 1 : 70;
+      openPrint(prev, "reprint");
+    });
+  </script>
+</body>
+</html>

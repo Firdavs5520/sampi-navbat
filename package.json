@@ -1,0 +1,11 @@
+{
+  "name": "sampi-navbat",
+  "version": "1.0.0",
+  "description": "Sampi Medline uchun web asosidagi navbat tizimi (index, admin, print sahifalari bilan)",
+  "main": "index.html",
+  "scripts": {
+    "start": "npm run dev"
+  },
+  "author": "Firdavs Sharipov",
+  "license": "MIT"
+}
