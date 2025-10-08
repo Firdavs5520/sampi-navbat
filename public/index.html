@@ -83,7 +83,6 @@
       background: #273c75;
       color: white;
       cursor: pointer;
-      
     }
 
     .admin-panel button:hover {
@@ -100,28 +99,47 @@
     src="https://static.vecteezy.com/system/resources/thumbnails/009/326/542/small_2x/enter-computer-key-button-on-white-background-flat-style-enter-button-symbol-enter-key-sign-vector.jpg"
     alt="Enter tugmasi" class="enter-key" id="enterBtn">
 
-  <p class="hint">Tugmanisini 2 marta bosib chekni oling</p>
+  <p class="hint">Tugmani 2 marta bosib chekni oling</p>
 
   <div class="admin-panel">
-    <input type="number" id="adminInput" min="1" max="70" placeholder="1–70">
+    <input type="number" id="adminInput" min="1" max="999" placeholder="1–999">
     <button id="setBtn">Boshlash</button>
     <button id="reprintBtn">Qayta chop etish</button>
   </div>
 
   <script>
-    // --- Boshlang'ich sozlamalar ---
-    let currentNumber = parseInt(localStorage.getItem('queueNumber')) || 1;
-    let printingInProgress = false; // enter 2 marta bosilmasin
+    // --- Smena aniqlash ---
+    const now = new Date();
+    const hour = now.getHours();
+    const isDayShift = hour >= 8 && hour < 20; // 8:00 - 20:00
+    const shiftName = isDayShift ? "Kunduzgi smena" : "Kechki smena";
+    const shiftCode = isDayShift ? "day" : "night";
+    const todayKey = `${shiftCode}-${now.toDateString()}`;
 
+    // --- Oldingi ma'lumotlarni tekshirish ---
+    const savedShift = localStorage.getItem("shiftKey");
+    let currentNumber;
+
+    if (savedShift !== todayKey) {
+      // Yangi smena boshlanganda yangi raqamdan boshlash
+      currentNumber = isDayShift ? 1 : 100;
+      localStorage.setItem("queueNumber", currentNumber);
+      localStorage.setItem("shiftKey", todayKey);
+    } else {
+      // Eski smena davom etmoqda
+      currentNumber = parseInt(localStorage.getItem("queueNumber")) || (isDayShift ? 1 : 100);
+    }
+
+    let printingInProgress = false;
     const numberEl = document.getElementById("currentNumber");
     numberEl.textContent = currentNumber;
 
     function openPrint(num, mode = "new") {
-      if (printingInProgress) return; // oldingi print tugamasincha yangi bosilmasin
+      if (printingInProgress) return;
       printingInProgress = true;
 
       localStorage.setItem("printStatus", "pending");
-      const printWindow = window.open(`print.html?num=${num}`, "_blank");
+      const printWindow = window.open(`print.html?num=${num}&shift=${encodeURIComponent(shiftName)}`, "_blank");
 
       const checkInterval = setInterval(() => {
         if (printWindow.closed) {
@@ -130,7 +148,7 @@
 
           if (mode === "new" && status === "success") {
             currentNumber++;
-            if (currentNumber > 70) currentNumber = 1;
+            if (currentNumber > 999) currentNumber = isDayShift ? 1 : 100;
             localStorage.setItem("queueNumber", currentNumber);
           }
 
@@ -140,31 +158,28 @@
       }, 500);
     }
 
-    // --- Tugma bosilganda ---
+    // --- Enter bosilganda yoki rasm bosilganda ---
     document.getElementById("enterBtn").addEventListener("click", () => openPrint(currentNumber));
-
-    // --- Klaviatura Enter bosilganda ---
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !printingInProgress) openPrint(currentNumber);
     });
 
-    // --- Admin panel: raqam o‘rnatish ---
+    // --- Admin panel ---
     document.getElementById("setBtn").addEventListener("click", () => {
       const val = Number(document.getElementById("adminInput").value);
-      if (val >= 1 && val <= 70) {
+      if (val >= 1 && val <= 999) {
         currentNumber = val;
         localStorage.setItem("queueNumber", currentNumber);
         numberEl.textContent = currentNumber;
         alert(`Boshlanish raqami ${val} qilib o‘rnatildi.`);
       } else {
-        alert("Raqam 1 dan 70 gacha bo‘lishi kerak!");
+        alert("Raqam 1 dan 999 gacha bo‘lishi kerak!");
       }
     });
 
-    // --- Qayta chop etish ---
     document.getElementById("reprintBtn").addEventListener("click", () => {
       const last = Number(localStorage.getItem("queueNumber")) || currentNumber;
-      const prev = last - 1 > 0 ? last - 1 : 70;
+      const prev = last - 1 > 0 ? last - 1 : (isDayShift ? 1 : 100);
       openPrint(prev, "reprint");
     });
   </script>
