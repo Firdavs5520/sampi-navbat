@@ -1,187 +1,219 @@
 <!DOCTYPE html>
 <html lang="uz">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sampi Medline Navbat</title>
-  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Golos Text', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #f5f6fa;
-      text-align: center;
-      margin: 0;
-    }
-
-    h1 {
-      color: #2f3640;
-      margin-bottom: 10px;
-      font-size: 32px;
-    }
-
-    .number {
-      font-size: 300px;
-      font-weight: bold;
-      color: #273c75;
-      margin: 0;
-      line-height: 1;
-    }
-
-    .hint {
-      color: #718093;
-      font-size: 40px;
-      margin-top: 25px;
-      font-weight: 800;
-    }
-
-    .enter-key {
-      margin-top: 10px;
-      width: 180px;
-      height: auto;
-      opacity: 0.9;
-      cursor: pointer;
-      transition: transform 0.2s ease, opacity 0.2s ease;
-      border-radius: 10px;
-    }
-
-    .enter-key:hover {
-      transform: scale(1.05);
-      opacity: 1;
-    }
-
-    .admin-panel {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
-
-    .admin-panel input {
-      width: 70px;
-      padding: 5px;
-      font-size: 16px;
-      text-align: center;
-      margin-right: 5px;
-      border: 1px solid #aaa;
-      border-radius: 6px;
-    }
-
-    .admin-panel button {
-      padding: 6px 10px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      background: #273c75;
-      color: white;
-      cursor: pointer;
-    }
-
-    .admin-panel button:hover {
-      background: #40739e;
-    }
-  </style>
-</head>
-<body>
-  <h1>SAMPI MEDLINE</h1>
-  <p>Hozir chiqariladigan navbat:</p>
-  <div class="number" id="currentNumber">1</div>
-
-  <img
-    src="https://static.vecteezy.com/system/resources/thumbnails/009/326/542/small_2x/enter-computer-key-button-on-white-background-flat-style-enter-button-symbol-enter-key-sign-vector.jpg"
-    alt="Enter tugmasi" class="enter-key" id="enterBtn">
-
-  <p class="hint">Tugmani 2 marta bosib chekni oling</p>
-
-  <div class="admin-panel">
-    <input type="number" id="adminInput" min="1" max="999" placeholder="1–999">
-    <button id="setBtn">Boshlash</button>
-    <button id="reprintBtn">Qayta chop etish</button>
-  </div>
-
-  <script>
-    // --- Smena aniqlash ---
-    const now = new Date();
-    const hour = now.getHours();
-    const isDayShift = hour >= 8 && hour < 20; // 8:00 - 20:00
-    const shiftName = isDayShift ? "Kunduzgi smena" : "Kechki smena";
-    const shiftCode = isDayShift ? "day" : "night";
-    const todayKey = `${shiftCode}-${now.toDateString()}`;
-
-    // --- Oldingi ma'lumotlarni tekshirish ---
-    const savedShift = localStorage.getItem("shiftKey");
-    let currentNumber;
-
-    if (savedShift !== todayKey) {
-      // Yangi smena boshlanganda yangi raqamdan boshlash
-      currentNumber = isDayShift ? 1 : 100;
-      localStorage.setItem("queueNumber", currentNumber);
-      localStorage.setItem("shiftKey", todayKey);
-    } else {
-      // Eski smena davom etmoqda
-      currentNumber = parseInt(localStorage.getItem("queueNumber")) || (isDayShift ? 1 : 100);
-    }
-
-    let printingInProgress = false;
-    const numberEl = document.getElementById("currentNumber");
-    numberEl.textContent = currentNumber;
-
-    function openPrint(num, mode = "new") {
-      if (printingInProgress) return;
-      printingInProgress = true;
-
-      localStorage.setItem("printStatus", "pending");
-      const printWindow = window.open(`print.html?num=${num}&shift=${encodeURIComponent(shiftName)}`, "_blank");
-
-      const checkInterval = setInterval(() => {
-        if (printWindow.closed) {
-          clearInterval(checkInterval);
-          const status = localStorage.getItem("printStatus");
-
-          if (mode === "new" && status === "success") {
-            currentNumber++;
-            if (currentNumber > 999) currentNumber = isDayShift ? 1 : 100;
-            localStorage.setItem("queueNumber", currentNumber);
-          }
-
-          numberEl.textContent = currentNumber;
-          printingInProgress = false;
-        }
-      }, 500);
-    }
-
-    // --- Enter bosilganda yoki rasm bosilganda ---
-    document.getElementById("enterBtn").addEventListener("click", () => openPrint(currentNumber));
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !printingInProgress) openPrint(currentNumber);
-    });
-
-    // --- Admin panel ---
-    document.getElementById("setBtn").addEventListener("click", () => {
-      const val = Number(document.getElementById("adminInput").value);
-      if (val >= 1 && val <= 999) {
-        currentNumber = val;
-        localStorage.setItem("queueNumber", currentNumber);
-        numberEl.textContent = currentNumber;
-        alert(`Boshlanish raqami ${val} qilib o‘rnatildi.`);
-      } else {
-        alert("Raqam 1 dan 999 gacha bo‘lishi kerak!");
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sampi Medline Navbat</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Golos Text", sans-serif;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        height: 100vh;
+        background: #f5f6fa;
+        margin: 0;
       }
-    });
 
-    document.getElementById("reprintBtn").addEventListener("click", () => {
-      const last = Number(localStorage.getItem("queueNumber")) || currentNumber;
-      const prev = last - 1 > 0 ? last - 1 : (isDayShift ? 1 : 100);
-      openPrint(prev, "reprint");
-    });
-  </script>
-</body>
+      .window {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        width: 45%;
+        text-align: center;
+        padding: 20px;
+      }
+
+      h1 {
+        color: #2f3640;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
+
+      .number {
+        font-size: 180px;
+        font-weight: bold;
+        color: #273c75;
+        margin: 0;
+        line-height: 1;
+      }
+
+      .hint {
+        color: #718093;
+        font-size: 20px;
+        margin-top: 15px;
+        font-weight: 600;
+      }
+
+      button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        background: #273c75;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background: #192a56;
+      }
+
+      .edit-box {
+        display: none;
+        margin-top: 10px;
+      }
+
+      .edit-box input {
+        width: 80px;
+        padding: 5px;
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .edit-box button {
+        margin-left: 8px;
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 🔹 LOR-1 oynasi -->
+    <div class="window" id="lor1">
+      <h1>LOR-1</h1>
+      <p>Hozir chiqariladigan navbat:</p>
+      <div class="number" id="num1">1</div>
+      <p class="hint">Enter tugmasini 1 marta bosing</p>
+      <button onclick="toggleEdit('lor1')">✏️ Raqamni o‘zgartirish</button>
+      <div class="edit-box" id="edit-lor1">
+        <input type="number" id="editInput-lor1" />
+        <button onclick="saveEdit('lor1')">Saqlash</button>
+      </div>
+    </div>
+
+    <!-- 🔹 LOR-2 oynasi -->
+    <div class="window" id="lor2">
+      <h1>LOR-2</h1>
+      <p>Hozir chiqariladigan navbat:</p>
+      <div class="number" id="num2">1</div>
+      <p class="hint">Enter tugmasini 2 marta bosing</p>
+      <button onclick="toggleEdit('lor2')">✏️ Raqamni o‘zgartirish</button>
+      <div class="edit-box" id="edit-lor2">
+        <input type="number" id="editInput-lor2" />
+        <button onclick="saveEdit('lor2')">Saqlash</button>
+      </div>
+    </div>
+
+    <script>
+      // 🔹 Hozirgi smenani aniqlash
+      function getCurrentShift() {
+        const hour = new Date().getHours();
+        return hour >= 8 && hour < 20 ? "day" : "night";
+      }
+
+      // 🔹 LOR oynalari uchun navbat funksiyasi
+      function setupQueue(lorKey, numberElId, startNum) {
+        const numEl = document.getElementById(numberElId);
+        const shift = getCurrentShift();
+        const storageKey = `${lorKey}-${shift}`;
+
+        // LocalStorage'dan o'qish, agar yo'q bo'lsa startNum dan boshlash
+        let current = parseInt(localStorage.getItem(storageKey));
+        if (!current || isNaN(current)) {
+          current = startNum;
+        }
+        numEl.textContent = current;
+
+        function openPrint(num) {
+          const w = window.open(
+            `print.html?num=${num}&lor=${lorKey}`,
+            "_blank"
+          );
+          const check = setInterval(() => {
+            if (w.closed) {
+              clearInterval(check);
+              const status = localStorage.getItem("printStatus");
+              if (status === "success") {
+                current++;
+                localStorage.setItem(storageKey, current);
+                numEl.textContent = current;
+              }
+            }
+          }, 400);
+        }
+
+        return {
+          print: () => openPrint(current),
+          setNumber: (newNum) => {
+            current = newNum;
+            numEl.textContent = current;
+            localStorage.setItem(storageKey, current);
+            openPrint(current);
+          },
+        };
+      }
+
+      // 🔹 Har ikkala LOR uchun sozlama
+      const LOR1 = setupQueue("lor1-number", "num1", 1);
+      const LOR2 = setupQueue("lor2-number", "num2", 1);
+
+      // 🔹 Edit panelni ochish/yopish
+      function toggleEdit(lor) {
+        const box = document.getElementById(`edit-${lor}`);
+        const input = document.getElementById(`editInput-${lor}`);
+        box.style.display = box.style.display === "block" ? "none" : "block";
+        input.focus();
+      }
+
+      // 🔹 Raqamni saqlash va chop etish
+      function saveEdit(lor) {
+        const input = document.getElementById(`editInput-${lor}`);
+        const value = parseInt(input.value);
+        if (isNaN(value) || value < 1) {
+          alert("Raqamni to‘g‘ri kiriting!");
+          return;
+        }
+        if (lor === "lor1") {
+          LOR1.setNumber(value);
+        } else {
+          LOR2.setNumber(value);
+        }
+        document.getElementById(`edit-${lor}`).style.display = "none";
+      }
+
+      // 🔹 Klaviatura orqali boshqarish
+      let enterCount = 0;
+      let lastPress = 0;
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const now = Date.now();
+
+          if (now - lastPress < 500) enterCount++;
+          else enterCount = 1;
+
+          lastPress = now;
+
+          clearTimeout(window.enterTimeout);
+
+          window.enterTimeout = setTimeout(() => {
+            if (enterCount === 1) {
+              LOR1.print(); // 🔹 1 marta Enter → LOR-1
+            } else if (enterCount === 2) {
+              LOR2.print(); // 🔹 2 marta Enter → LOR-2
+            }
+            enterCount = 0;
+          }, 400);
+        }
+      });
+    </script>
+  </body>
 </html>

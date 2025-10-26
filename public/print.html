@@ -1,111 +1,108 @@
 <!DOCTYPE html>
 <html lang="uz">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Navbat Cheki</title>
-  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    @media print {
-      @page {
-        size: 58mm auto;
-        margin: 0;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navbat Cheki</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @media print {
+        @page {
+          size: 58mm auto;
+          margin: 0;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+          width: 58mm;
+          font-family: "Golos Text", sans-serif;
+          text-align: center;
+          display: flex;
+          justify-content: center;
+        }
+        .check {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+        }
+        .title {
+          font-size: 22px;
+          font-weight: 700;
+          margin-top: 0;
+        }
+        .divider {
+          border: 1px dashed black;
+          width: 90%;
+          margin: 6px 0;
+        }
+        .small {
+          font-size: 22px;
+        }
+        .number {
+          font-size: 110px;
+          font-weight: 800;
+          margin: 0;
+          letter-spacing: 2px;
+          width: 100%;
+          text-align: center;
+          line-height: 1;
+        }
+        .footer {
+          font-size: 18px;
+          margin-top: 5px;
+        }
       }
-
       body {
-        margin: 0;
-        padding: 0;
-        width: 58mm;
-        font-family: 'Golos Text', sans-serif;
-        text-align: center;
+        background: #f5f5f5;
+        font-family: "Golos Text", sans-serif;
         display: flex;
         justify-content: center;
-      }
-
-      .check {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        padding: 0;
-      }
-
-      .title {
-        font-size: 22px;
-        font-weight: 700;
-        margin-top: 0px;
-      }
-
-      .divider {
-        border: 1px dashed black;
-        width: 90%;
-        margin-top: 8px;
-        margin-bottom: 8px;
-      }
-
-      .small {
-        font-size: 22px;
-        margin-top: 0;
-      }
-
-      /* 🔹 Navbat raqami to‘liq enlikda bo‘ladi */
-      .number {
-        font-size: 110px; /* 58mm chek uchun mos eng katta o‘lcham */
-        font-weight: 800;
-        margin: 0;
-        letter-spacing: 2px;
-        width: 100%;
+        height: 100vh;
         text-align: center;
-        line-height: 1;
       }
+    </style>
+  </head>
+  <body>
+    <div class="check">
+      <div class="title">SAMPI MEDLINE</div>
+      <div class="divider"></div>
+      <div class="small" id="lorName">LOR-1</div>
+      <div class="divider"></div>
+      <div class="small">Navbat raqami:</div>
+      <div class="divider"></div>
+      <div class="number" id="queueNumber">00</div>
+      <div class="divider"></div>
+      <div class="footer">Tashrifingiz uchun rahmat!</div>
+      <div class="divider"></div>
+    </div>
 
-      .footer {
-        font-size: 18px;
-        margin-top: 0px;
-      }
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const num = params.get("num") || "00";
+      const lorKey = params.get("lor");
+      const lor = lorKey === "lor2-number" ? "LOR-2" : "LOR-1";
 
-      
-    }
+      document.getElementById("lorName").textContent = lor;
+      document.getElementById("queueNumber").textContent = String(num).padStart(
+        2,
+        "0"
+      );
 
-    /* Ekranda ko‘rish uchun */
-    body {
-      background: #f5f5f5;
-      font-family: 'Golos Text', sans-serif;
-      display: flex;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <div class="check">
-    <div class="title">SAMPI MEDLINE</div>
-    <div class="divider"></div>
-    <div class="small">Navbat raqami:</div>
-    <div class="divider"></div>
-    <div class="number" id="queueNumber">00</div>
-    <div class="divider"></div>
-    <div class="footer">Tashrifingiz uchun rahmat!</div>
-    <div class="divider"></div>
-  </div>
+      localStorage.setItem("printStatus", "pending");
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const num = params.get('num') || '00';
-    document.getElementById('queueNumber').textContent = String(num).padStart(2, '0');
+      const mql = window.matchMedia("print");
+      mql.addEventListener("change", (e) => {
+        if (!e.matches) {
+          localStorage.setItem("printStatus", "success");
+          window.close();
+        }
+      });
 
-    localStorage.setItem("printStatus", "pending");
-
-    const mediaQueryList = window.matchMedia('print');
-    mediaQueryList.addEventListener('change', (mql) => {
-      if (!mql.matches) {
-        localStorage.setItem("printStatus", "success");
-        window.close();
-      }
-    });
-
-    window.onload = () => { window.print(); };
-  </script>
-</body>
+      window.onload = () => window.print();
+    </script>
+  </body>
 </html>
